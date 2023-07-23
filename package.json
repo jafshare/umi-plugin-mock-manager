@@ -1,0 +1,29 @@
+{
+  "name": "umi-mock-manger",
+  "version": "1.0.0",
+  "author": {
+    "name": "HunterJiang"
+  },
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint --cache --fix  --ext .js,.ts,.jsx,.tsx .",
+    "prepare": "npx husky install"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": "eslint --cache --fix --ext .js,.ts,.jsx,.tsx .",
+    "*.{js,jsx,tsx,ts,less,md,json}": "prettier --ignore-unknown --write"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config-ts": "0.39.8",
+    "@commitlint/cli": "^17.3.0",
+    "@commitlint/config-conventional": "^17.3.0",
+    "eslint": "^8.29.0",
+    "eslint-config-prettier": "^8.0.0",
+    "eslint-plugin-import": "2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.8.1",
+    "typescript": "5.1.6"
+  }
+}
