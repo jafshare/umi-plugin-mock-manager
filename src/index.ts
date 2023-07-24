@@ -57,6 +57,7 @@ function mergeMockData(
 }
 export interface Context {
   mockData: MockRecords;
+  lastUpdateDate?: string;
 }
 export default (api: IApi) => {
   const { mock } = api.userConfig;
@@ -86,6 +87,8 @@ export default (api: IApi) => {
       return api.name === "dev";
     }
   });
+  // 禁用默认的mock插件
+  api.skipPlugins(["mock"]);
   const context: Context = { mockData: readMockCache() };
   //  获取 mock 相关的配置
   const mockConfig = api.config.mock || {};
