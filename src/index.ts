@@ -9,7 +9,7 @@ import { watch } from "./watch";
 
 import type { MockRecords, RawMockRecord } from "./mock";
 import type { IApi } from "@umijs/max";
-
+const mockPageFile = "MockManager.tsx";
 const pluginDir = "plugin-mockManager";
 const mockCacheDir = "node_modules/.cache/mock";
 function getFileContent(filename: string) {
@@ -87,8 +87,8 @@ export default (api: IApi) => {
       return api.name === "dev";
     }
   });
-  // 禁用默认的mock插件
-  api.skipPlugins(["mock"]);
+  // TODO 禁用默认的mock插件
+  // api.skipPlugins(["mock"]);
   const context: Context = { mockData: readMockCache() };
   //  获取 mock 相关的配置
   const mockConfig = api.config.mock || {};
@@ -101,11 +101,10 @@ export default (api: IApi) => {
     saveMockCache(context.mockData);
   };
 
-  // TODO 禁用默认的mock插件
   api.onStart(() => {
     logger.info(
       chalk.greenBright(
-        "mock-manger 插件启动, 请访问 /_mock 页面进行 mock 管理"
+        "mock-manager 插件启动, 请访问 /_mock 页面进行 mock 管理"
       )
     );
     const { include = [] } = mockConfig;
@@ -130,18 +129,26 @@ export default (api: IApi) => {
 
   api.onGenerateFiles(() => {
     api.writeTmpFile({
-      path: `mockManger.tsx`,
-      content: getFileContent("mockManager.tsx")
+      path: mockPageFile,
+      content: getFileContent(mockPageFile)
     });
   });
   // 增加单独的 _mock 页面
   api.modifyConfig((memo) => {
     // TODO 增加 mock 页面的路由,需要手动输入地址跳入，后续看能不能直接加一个菜单
+    // 这里只是为了占位，实际的对应组件是在 modifyRoutes 中生成的,原因是这里会对 component 进行校验，导致无法通过
     memo.routes.unshift({
       path: "/_mock",
       name: "_mock",
       layout: false,
-      component: getComponentPath("mockManger.tsx")
+    });
+    return memo;
+  });
+  api.modifyRoutes((memo) => {
+    Object.keys(memo).forEach((key) => {
+      if (memo[key].name === "_mock") {
+        memo[key].file = getComponentPath(mockPageFile);
+      }
     });
     return memo;
   });
