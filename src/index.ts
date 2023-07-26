@@ -140,7 +140,7 @@ export default (api: IApi) => {
     memo.routes.unshift({
       path: "/_mock",
       name: "_mock",
-      layout: false,
+      layout: false
     });
     return memo;
   });

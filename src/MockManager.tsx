@@ -1,5 +1,5 @@
 import { RedoOutlined, DownOutlined } from "@ant-design/icons";
-import { request, useRequest } from "@umijs/max";
+import { useRequest } from "@umijs/max";
 import {
   Badge,
   Button,
@@ -17,13 +17,32 @@ const getChildren = (path: string) => {
   if (!path) return [];
   return path.split("/");
 };
+const request = async (url: string, options?: RequestInit & { data?: any }) => {
+  const { method = "get", data, headers = {}, ...rest } = options || {};
+  if (method.toUpperCase() === "POST") {
+    //@ts-ignore
+    headers["Accept"] = "application/json";
+    //@ts-ignore
+    headers["Content-Type"] = "application/json";
+  }
+  const res = await fetch(url, {
+    method,
+    headers,
+    body: JSON.stringify(data),
+    ...rest
+  });
+  return res.json();
+};
 export default () => {
   const [query, setQuery] = React.useState("");
   const [mode, setMode] = React.useState("Tree");
-  const { data = [], run: fetchMock } = useRequest("/_mock/_getMock", {
-    // TODO 是否需要轮询更新数据
-    // pollingInterval: 5 * 1000,
-  });
+  const { data = [], run: fetchMock } = useRequest(
+    async () => request("/_mock/_getMock", { method: "get" }),
+    {
+      // TODO 是否需要轮询更新数据
+      // pollingInterval: 5 * 1000,
+    }
+  );
   const dataSource = useMemo(() => {
     if (!query) {
       return data;
@@ -125,9 +144,9 @@ export default () => {
             disabled={dataSource.length === 0}
             style={{ marginRight: 10 }}
           />
-          激活 {enableRules.length} 条 ，关闭
-          {dataSource.length - enableRules.length} 条 ，共
-          {dataSource.length} 条
+          激活<span style={{padding:'0 5px'}}>{enableRules.length}</span>条 ，关闭
+          <span style={{padding:'0 5px'}}>{dataSource.length - enableRules.length}</span> 条 ，共
+          <span style={{padding:'0 5px'}}>{dataSource.length}</span> 条
         </div>
         {mode === "Tree" ? (
           <Tree
