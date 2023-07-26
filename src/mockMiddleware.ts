@@ -7,6 +7,7 @@ import { type Context, saveMockCache } from "./index";
 
 import type { MockRecord, MockRecords } from "./mock";
 import type { NextFunction, Request, Response } from "express";
+import { openWithEditor } from "./openWithEditor";
 
 function getPathReAndKeys(path: string) {
   const keys: any[] = [];
@@ -50,6 +51,13 @@ export function mockMiddleware(context: Context) {
         method: "POST",
         path: "/_mock/_updateMock",
         handler: updateMock(context),
+        enable: true
+      },
+      "POST /_mock/_openSourceWithEditor": {
+        id: "POST /_mock/_openSourceWithEditor",
+        method: "POST",
+        path: "/_mock/_openSourceWithEditor",
+        handler: openEditor(context),
         enable: true
       }
     };
@@ -122,6 +130,14 @@ function updateMock(context: Context) {
     });
     // 同步更新缓存
     saveMockCache(context.mockData);
+    res.json({ code: 1, message: "success" });
+  };
+}
+// 打开源码
+function openEditor(context: Context) {
+  return (req: Request, res: Response) => {
+    const data = req.body;
+    openWithEditor({ filename: data.file });
     res.json({ code: 1, message: "success" });
   };
 }

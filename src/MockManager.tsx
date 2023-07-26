@@ -1,4 +1,4 @@
-import { RedoOutlined, DownOutlined } from "@ant-design/icons";
+import { RedoOutlined, DownOutlined, AimOutlined } from "@ant-design/icons";
 import { useRequest } from "@umijs/max";
 import {
   Badge,
@@ -16,7 +16,7 @@ import React, { useMemo } from "react";
 function getChildren(path: string) {
   if (!path) return [];
   return path.split("/");
-};
+}
 const request = async (url: string, options?: RequestInit & { data?: any }) => {
   const { method = "get", data, headers = {}, ...rest } = options || {};
   if (method.toUpperCase() === "POST") {
@@ -112,6 +112,12 @@ export default () => {
     });
     fetchMock();
   };
+  const handleOpenSourceWithEditor = async (item: any) => {
+    await request("/_mock/_openSourceWithEditor", {
+      method: "post",
+      data: item
+    });
+  };
   const handleReset = () => {
     setQuery("");
     fetchMock();
@@ -144,9 +150,13 @@ export default () => {
             disabled={dataSource.length === 0}
             style={{ marginRight: 10 }}
           />
-          激活<span style={{padding:'0 5px'}}>{enableRules.length}</span>条 ，关闭
-          <span style={{padding:'0 5px'}}>{dataSource.length - enableRules.length}</span> 条 ，共
-          <span style={{padding:'0 5px'}}>{dataSource.length}</span> 条
+          激活<span style={{ padding: "0 5px" }}>{enableRules.length}</span>条
+          ，关闭
+          <span style={{ padding: "0 5px" }}>
+            {dataSource.length - enableRules.length}
+          </span>{" "}
+          条 ，共
+          <span style={{ padding: "0 5px" }}>{dataSource.length}</span> 条
         </div>
         {mode === "Tree" ? (
           <Tree
@@ -189,6 +199,10 @@ export default () => {
                       {item.data.method}
                     </Tag>
                     <span style={{ padding: 10 }}>{item.title}</span>
+                    <AimOutlined
+                    title="点击打开源码查看"
+                      onClick={() => handleOpenSourceWithEditor(item.data)}
+                    />
                   </>
                 );
               }
@@ -221,6 +235,10 @@ export default () => {
                     onChange={() => handleToggleEnable(item)}
                     checked={item.enable}
                     defaultChecked={item.enable}
+                  />
+                  <AimOutlined
+                    title="点击打开源码查看"
+                    onClick={() => handleOpenSourceWithEditor(item)}
                   />
                 </div>
               </List.Item>
