@@ -1,8 +1,9 @@
 import { chokidar, winPath } from "@umijs/utils";
 
-const unWatches: Function[] = [];
+export type Func = () => any;
+const unWatches: Func[] = [];
 
-export function addUnWatch(unWatcher: Function) {
+export function addUnWatch(unWatcher: Func) {
   unWatches.push(unWatcher);
 }
 
