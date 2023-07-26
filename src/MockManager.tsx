@@ -1,22 +1,22 @@
-import { RedoOutlined, DownOutlined } from "@ant-design/icons";
+import { DownOutlined, RedoOutlined } from "@ant-design/icons";
 import { request, useRequest } from "@umijs/max";
 import {
   Badge,
   Button,
   Input,
   List,
+  Segmented,
   Space,
   Switch,
   Tag,
-  Tree,
-  Segmented
+  Tree
 } from "antd";
 import React, { useMemo } from "react";
 // 将路径拆分为一个个子目录
-const getChildren = (path: string) => {
+function getChildren(path: string) {
   if (!path) return [];
   return path.split("/");
-};
+}
 export default () => {
   const [query, setQuery] = React.useState("");
   const [mode, setMode] = React.useState("Tree");
@@ -56,7 +56,7 @@ export default () => {
     Object.entries(tree).forEach(([key, val]) => {
       result.push({
         title: key,
-        key: key,
+        key,
         selectable: false,
         isLeaf: false,
         children: val.map((v) => ({
@@ -89,7 +89,7 @@ export default () => {
   const handleBatchUpdate = async (data: { id: string; enable: boolean }[]) => {
     await request("/_mock/_updateMock", {
       method: "post",
-      data: data
+      data
     });
     fetchMock();
   };

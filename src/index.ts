@@ -9,6 +9,7 @@ import { watch } from "./watch";
 
 import type { MockRecords, RawMockRecord } from "./mock";
 import type { IApi } from "@umijs/max";
+
 const mockPageFile = "MockManager.tsx";
 const pluginDir = "plugin-mockManager";
 const mockCacheDir = "node_modules/.cache/mock";
@@ -140,7 +141,7 @@ export default (api: IApi) => {
     memo.routes.unshift({
       path: "/_mock",
       name: "_mock",
-      layout: false,
+      layout: false
     });
     return memo;
   });
