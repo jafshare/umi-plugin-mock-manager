@@ -1,5 +1,4 @@
-import { RedoOutlined, DownOutlined, AimOutlined } from "@ant-design/icons";
-import { useRequest } from "@umijs/max";
+import { AimOutlined, DownOutlined, RedoOutlined } from "@ant-design/icons";
 import {
   Badge,
   Button,
@@ -12,17 +11,18 @@ import {
   Tree
 } from "antd";
 import React, { useMemo } from "react";
+import { useRequest } from "umi";
 // 将路径拆分为一个个子目录
 function getChildren(path: string) {
   if (!path) return [];
   return path.split("/");
 }
-const request = async (url: string, options?: RequestInit & { data?: any }) => {
+async function request(url: string, options?: RequestInit & { data?: any }) {
   const { method = "get", data, headers = {}, ...rest } = options || {};
   if (method.toUpperCase() === "POST") {
-    //@ts-ignore
-    headers["Accept"] = "application/json";
-    //@ts-ignore
+    // @ts-expect-error
+    headers.Accept = "application/json";
+    // @ts-expect-error
     headers["Content-Type"] = "application/json";
   }
   const res = await fetch(url, {
@@ -32,7 +32,7 @@ const request = async (url: string, options?: RequestInit & { data?: any }) => {
     ...rest
   });
   return res.json();
-};
+}
 export default () => {
   const [query, setQuery] = React.useState("");
   const [mode, setMode] = React.useState("Tree");
@@ -200,7 +200,7 @@ export default () => {
                     </Tag>
                     <span style={{ padding: 10 }}>{item.title}</span>
                     <AimOutlined
-                    title="点击打开源码查看"
+                      title="点击打开源码查看"
                       onClick={() => handleOpenSourceWithEditor(item.data)}
                     />
                   </>

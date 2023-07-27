@@ -16,6 +16,8 @@ export interface MockRecord {
   file?: string;
   // 对应的行
   line?: number;
+  // 标识 mock 的类型, 目前只有 mockApi
+  type?: string;
 }
 export type RawMockRecord = Omit<MockRecord, "enable">;
 export type MockRecords = Record<string, MockRecord>;

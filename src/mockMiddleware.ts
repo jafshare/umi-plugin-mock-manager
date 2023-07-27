@@ -3,11 +3,12 @@ import { json, urlencoded } from "body-parser";
 import multer from "multer";
 import { pathToRegexp } from "path-to-regexp";
 
+import { openWithEditor } from "./openWithEditor";
+
 import { type Context, saveMockCache } from "./index";
 
 import type { MockRecord, MockRecords } from "./mock";
 import type { NextFunction, Request, Response } from "express";
-import { openWithEditor } from "./openWithEditor";
 
 function getPathReAndKeys(path: string) {
   const keys: any[] = [];
@@ -44,28 +45,36 @@ export function mockMiddleware(context: Context) {
         method: "GET",
         path: "/_mock/_getMock",
         handler: getMock(context),
-        enable: true
+        enable: true,
+        type: "mockApi"
       },
       "POST /_mock/_updateMock": {
         id: "POST /_mock/_updateMock",
         method: "POST",
         path: "/_mock/_updateMock",
         handler: updateMock(context),
-        enable: true
+        enable: true,
+        type: "mockApi"
       },
       "POST /_mock/_openSourceWithEditor": {
         id: "POST /_mock/_openSourceWithEditor",
         method: "POST",
         path: "/_mock/_openSourceWithEditor",
         handler: openEditor(context),
-        enable: true
+        enable: true,
+        type: "mockApi"
       }
     };
     const mockRecords: MockRecords = { ...context.mockData, ...mockApi };
     for (const k in mockRecords) {
       const mock = mockRecords[k];
       if (mock.method !== method || !mock.enable) continue;
-      const { keys, re } = getPathReAndKeys(mock.path);
+      let mockPath = mock.path;
+      // 如果指定了前缀，需要给每个 url 增加前缀, 排除 mock 内部使用的api
+      if (mock.type !== "mockApi" && context.prefix) {
+        mockPath = `${context.prefix}${mockPath}`;
+      }
+      const { keys, re } = getPathReAndKeys(mockPath);
       const m = re.exec(req.path);
       if (m) {
         // TODO 参数控制是否需要输出被拦截的mock请求

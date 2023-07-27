@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { exec } from "node:child_process";
 /**
  * 用指定编辑器打开对应的文件
  * @param source

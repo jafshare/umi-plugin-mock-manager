@@ -59,10 +59,9 @@ function mergeMockData(
 export interface Context {
   mockData: MockRecords;
   lastUpdateDate?: string;
+  prefix: string;
 }
 export default (api: IApi) => {
-  const { mock } = api.userConfig;
-  // TODO 扫描mock目录，生成mock完整的配置
   api.describe({
     key: "mockManager",
     config: {
@@ -75,13 +74,17 @@ export default (api: IApi) => {
           include: joi.array().items(joi.string()),
           // 缓存的mock数据
           cacheOutput: joi.string().default(mockCacheDir),
+          // debug 配置控制
           log: joi.object({
             // 是否开启mock匹配的日志输出
             match: joi.boolean().default(true)
-          })
+          }),
+          /**
+           * 统一给 url 增加前缀, 考虑到请求库可以统一设置 baseURL,这里增加一个参数统一做处理
+           */
+          prefix: joi.string().default("")
         });
       }
-      // TODO debug 配置控制
     },
     enableBy() {
       // 只有 dev 才默认开启
@@ -90,9 +93,12 @@ export default (api: IApi) => {
   });
   // TODO 禁用默认的mock插件
   // api.skipPlugins(["mock"]);
-  const context: Context = { mockData: readMockCache() };
   //  获取 mock 相关的配置
-  const mockConfig = api.config.mock || {};
+  const mockConfig = api.userConfig.mockManager || {};
+  const context: Context = {
+    mockData: readMockCache(),
+    prefix: mockConfig?.prefix || ""
+  };
   const updateMockData = () => {
     context.mockData = mergeMockData(
       context.mockData,
@@ -137,7 +143,7 @@ export default (api: IApi) => {
   // 增加单独的 _mock 页面
   api.modifyConfig((memo) => {
     // TODO 增加 mock 页面的路由,需要手动输入地址跳入，后续看能不能直接加一个菜单
-    // 这里只是为了占位，实际的对应组件是在 modifyRoutes 中生成的,原因是这里会对 component 进行校验，导致无法通过
+    // 这里只是为了占位，实际的对应组件是在 modifyRoutes 中生成的,原因是这里会对 component 的文件路径进行校验，导致无法通过
     memo.routes.unshift({
       path: "/_mock",
       name: "_mock",
