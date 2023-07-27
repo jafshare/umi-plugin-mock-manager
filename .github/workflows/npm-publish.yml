@@ -25,14 +25,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: 安装pnpm
+        uses: pnpm/action-setup@v2.2.4
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 16.x
           registry-url: https://registry.npmjs.org/
-      - name: 安装pnpm
-        run: npm i -g pnpm
+          cache: "pnpm"
       - name: 安装依赖
-        run: pnpm i
+        run: pnpm install
       - name: 打包
         run: pnpm run build
       - name: 发布npm包
