@@ -12,7 +12,7 @@ import type { IApi } from "@umijs/max";
 
 const mockPageFile = "MockManager.tsx";
 const pluginDir = "plugin-mockManager";
-const mockCacheDir = "node_modules/.cache/mock";
+let mockCacheDir = "node_modules/.cache/mock";
 function getFileContent(filename: string) {
   return fs.readFileSync(path.join(__dirname, filename), "utf-8");
 }
@@ -99,6 +99,7 @@ export default (api: IApi) => {
     mockData: readMockCache(),
     prefix: mockConfig?.prefix || ""
   };
+  mockCacheDir = mockConfig?.cacheOutput || mockCacheDir;
   const updateMockData = () => {
     context.mockData = mergeMockData(
       context.mockData,
