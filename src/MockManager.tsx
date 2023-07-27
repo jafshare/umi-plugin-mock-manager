@@ -78,6 +78,7 @@ export default () => {
         key,
         selectable: false,
         isLeaf: false,
+        data: { file: key },
         children: val.map((v) => ({
           title: v.path,
           key: v.id,
@@ -186,6 +187,13 @@ export default () => {
                     <Tag style={{ marginLeft: 5 }} color="purple">
                       {item.children.length}
                     </Tag>
+                    <AimOutlined
+                      title="点击打开源码查看"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenSourceWithEditor(item.data);
+                      }}
+                    />
                   </>
                 );
               } else {
@@ -199,10 +207,10 @@ export default () => {
                       {item.data.method}
                     </Tag>
                     <span style={{ padding: 10 }}>{item.title}</span>
-                    <AimOutlined
+                    {/* <AimOutlined
                       title="点击打开源码查看"
                       onClick={() => handleOpenSourceWithEditor(item.data)}
-                    />
+                    /> */}
                   </>
                 );
               }
@@ -229,17 +237,19 @@ export default () => {
                     )}
                   </span>
                   <span style={{ padding: 10 }}>{item.path}</span>
-                  <Switch
-                    checkedChildren="激活"
-                    unCheckedChildren="关闭"
-                    onChange={() => handleToggleEnable(item)}
-                    checked={item.enable}
-                    defaultChecked={item.enable}
-                  />
-                  <AimOutlined
-                    title="点击打开源码查看"
-                    onClick={() => handleOpenSourceWithEditor(item)}
-                  />
+                  <Space>
+                    <Switch
+                      checkedChildren="激活"
+                      unCheckedChildren="关闭"
+                      onChange={() => handleToggleEnable(item)}
+                      checked={item.enable}
+                      defaultChecked={item.enable}
+                    />
+                    <AimOutlined
+                      title="点击打开源码查看"
+                      onClick={() => handleOpenSourceWithEditor(item)}
+                    />
+                  </Space>
                 </div>
               </List.Item>
             )}
