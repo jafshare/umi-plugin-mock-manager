@@ -27,9 +27,9 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 16.15
           registry-url: https://registry.npmjs.org/
-      - name: 安装yarn
+      - name: 安装pnpm
         run: npm i -g pnpm
       - name: 安装依赖
         run: pnpm i
