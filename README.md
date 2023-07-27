@@ -1,16 +1,16 @@
-# umi-mock-manager
+# umi-plugin-mock-manager
 
 `mock`管理插件，在已有的`mock`基础功能上，增加页面用来更细粒度的`mock`控制，可以精确到某一条`mock`启用状态。
 
 ## 功能
 
-[ x ] 提供`ui`页面可以更精确的控制`mock`状态
+- [x] 提供`ui`页面可以更精确的控制`mock`状态
 
-[ x ] 缓存记录每一次的配置修改
+- [x] 缓存记录每一次的配置修改
 
-[ x ] 统一增加前缀,适配`request`的`baseURL`功能
+- [x] 统一增加前缀,适配`request`的`baseURL`功能
 
-[ x ] 点击跳转到对应的源码文件
+- [x] 点击跳转到对应的源码文件
 
 ## 安装
 
