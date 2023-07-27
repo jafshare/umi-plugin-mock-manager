@@ -1,5 +1,5 @@
 {
-  "name": "umi-mock-manager",
+  "name": "umi-plugin-mock-manager",
   "version": "1.0.0",
   "packageManager": "pnpm@7.14.0",
   "author": {
