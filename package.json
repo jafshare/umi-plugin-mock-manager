@@ -1,11 +1,11 @@
 {
   "name": "umi-mock-manger",
   "version": "1.0.0",
+  "packageManager": "pnpm@7.14.0",
   "author": {
     "name": "HunterJiang"
   },
-  "main": "./dist/cjs/index.js",
-  "types": "./dist/cjs/index.d.ts",
+  "main": "./dist/index.js",
   "files": [
     "dist",
     "src"
@@ -47,5 +47,8 @@
     "multer": "1.4.5-lts.1",
     "path-to-regexp": "^6.2.1",
     "rollup": "^3.26.3"
+  },
+  "engines": {
+    "node": ">=16.11.0"
   }
 }
