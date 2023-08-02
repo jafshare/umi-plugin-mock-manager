@@ -93,7 +93,10 @@ export default (api: IApi) => {
     },
     enableBy() {
       // 只有 dev 才默认开启
-      return api.name === "dev";
+      if (api.name === "dev") {
+        return false;
+      }
+      return process.env.MOCK !== "none";
     }
   });
   // TODO 禁用默认的mock插件
