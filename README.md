@@ -14,7 +14,7 @@
 
 ## 安装
 
-`npm install -D umi-mock-manager`
+`npm install -D umi-plugin-mock-manager`
 
 ## 配置
 
@@ -24,18 +24,18 @@
 export default {
   // 插件的相关配置
   mockManager: {
-    // mock 文件夹是默认包含在内的，如果有需要可以手动添加
-    includes: ["src/**/mock/**.mock.ts"],
+    // mock 文件夹是默认包含在内的，如果有需要可以手动添加,支持通配符
+    include: ["src/**/mock/**.mock.ts"],
     // 如果 request 设置了 baseURL,则需要增加该前缀，如果定义的每个 mock 记录已包含，则可以不用设置
     prefix: "/api"
   },
   // 添加插件
-  plugins: ["umi-mock-manager"]
+  plugins: ["umi-plugin-mock-manager"]
 };
 ```
 
 ## 启动项目
 
-注意：执行的`npm`命令需要保证`umi`的启动命令名是`dev`，一般用`npm run dev`即可
+注意：执行的`npm`命令需要保证`umi`的启动命令名是`dev`且`MOCK`变量不能`none`，一般用`npm run start`即可
 
 启动项目后，访问`/_mock`地址即可
