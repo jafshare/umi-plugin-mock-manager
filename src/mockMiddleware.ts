@@ -5,7 +5,7 @@ import { pathToRegexp } from "path-to-regexp";
 
 import { openWithEditor } from "./openWithEditor";
 
-import { type Context, saveMockCache } from "./index";
+import { type Context } from "./index";
 
 import type { MockRecord, MockRecords } from "./mock";
 import type { NextFunction, Request, Response } from "express";
@@ -77,8 +77,11 @@ export function mockMiddleware(context: Context) {
       const { keys, re } = getPathReAndKeys(mockPath);
       const m = re.exec(req.path);
       if (m) {
-        // TODO 参数控制是否需要输出被拦截的mock请求
-        logger.info(`[Mock] ${req.url}`);
+        // 控制是否需要输出被拦截的mock请求
+        if (context.config?.log?.match ?? true) {
+          logger.info(`[Mock] match -> ${req.url}`);
+        }
+        context.onMock?.({ mock, isInnerApi: mock.type === "mockApi" });
         if (typeof mock.handler === "function") {
           // 解析params,如果有动态路由参数的话
           const params: Record<string, any> = {};
@@ -123,9 +126,14 @@ function getMock(context: Context) {
     Object.entries(context.mockData).forEach(([key, value]) => {
       data.push({ ...value, id: key });
     });
-    res.json({ code: 1, message: "success", data });
+    res.json({
+      code: 1,
+      message: "success",
+      data
+    });
   };
 }
+
 // 变更mock数据
 function updateMock(context: Context) {
   return (req: Request, res: Response) => {
@@ -137,8 +145,9 @@ function updateMock(context: Context) {
         mock.enable = u.enable;
       }
     });
+    context.updateTime = Date.now();
     // 同步更新缓存
-    saveMockCache(context.mockData);
+    context.onCacheUpdate?.();
     res.json({ code: 1, message: "success" });
   };
 }

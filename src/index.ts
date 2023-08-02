@@ -7,26 +7,26 @@ import { getMockData } from "./mock";
 import { mockMiddleware } from "./mockMiddleware";
 import { watch } from "./watch";
 
-import type { MockRecords, RawMockRecord } from "./mock";
+import type { MockRecord, MockRecords, RawMockRecord } from "./mock";
 import type { IApi } from "@umijs/max";
 
 const mockPageFile = "MockManager.tsx";
 const pluginDir = "plugin-mockManager";
-const mockCacheDir = "node_modules/.cache/mock";
+let mockCacheDir = "node_modules/.cache/mock";
 function getFileContent(filename: string) {
   return fs.readFileSync(path.join(__dirname, filename), "utf-8");
 }
 function getComponentPath(filename: string) {
   return path.join(process.cwd(), "src", ".umi", pluginDir, filename);
 }
-export function readMockCache(): MockRecords {
+export function readMockCache(): { data: MockRecords; updateTime?: number } {
   const mockCachePath = path.join(process.cwd(), mockCacheDir, "mock.json");
   if (fs.existsSync(mockCachePath)) {
     return JSON.parse(fs.readFileSync(mockCachePath, "utf-8"));
   }
-  return {};
+  return { data: {} };
 }
-export function saveMockCache(data: MockRecords) {
+export function saveMockCache(data: MockRecords, time: number) {
   const mockCachePath = path.join(process.cwd(), mockCacheDir, "mock.json");
   // 不存在则先创建对应的目录
   if (!fs.existsSync(mockCachePath)) {
@@ -34,7 +34,7 @@ export function saveMockCache(data: MockRecords) {
   }
   fs.writeFileSync(
     path.join(process.cwd(), mockCacheDir, "mock.json"),
-    JSON.stringify(data, null, 2)
+    JSON.stringify({ data, updateTime: time }, null, 2)
   );
 }
 function mergeMockData(
@@ -60,6 +60,11 @@ export interface Context {
   mockData: MockRecords;
   lastUpdateDate?: string;
   prefix: string;
+  updateTime?: number;
+  config: Record<string, any>;
+  onMock?: (data: { mock: MockRecord; isInnerApi: boolean }) => void;
+  // 保存缓存
+  onCacheUpdate?: () => void;
 }
 export default (api: IApi) => {
   api.describe({
@@ -95,17 +100,31 @@ export default (api: IApi) => {
   // api.skipPlugins(["mock"]);
   //  获取 mock 相关的配置
   const mockConfig = api.userConfig.mockManager || {};
+  const { data: mockData, updateTime } = readMockCache();
   const context: Context = {
-    mockData: readMockCache(),
-    prefix: mockConfig?.prefix || ""
+    mockData,
+    prefix: mockConfig?.prefix || "",
+    updateTime,
+    config: mockConfig,
+    onCacheUpdate: () => {
+      saveMockCache(context.mockData, context.updateTime as number);
+    },
+    onMock: (data) => {
+      const { mock, isInnerApi } = data;
+      if (!isInnerApi) {
+        // TODO 缓存历史记录数据
+      }
+    }
   };
+  mockCacheDir = mockConfig?.cacheOutput || mockCacheDir;
   const updateMockData = () => {
     context.mockData = mergeMockData(
       context.mockData,
       getMockData({ cwd: api.cwd, mockConfig })
     );
+    context.updateTime = Date.now();
     // 缓存数据
-    saveMockCache(context.mockData);
+    context.onCacheUpdate?.();
   };
 
   api.onStart(() => {
