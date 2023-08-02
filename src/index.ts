@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { chalk, lodash, logger } from "@umijs/utils";
+import { chalk, lodash, logger, portfinder } from "@umijs/utils";
 
 import { getMockData } from "./mock";
 import { mockMiddleware } from "./mockMiddleware";
@@ -56,6 +56,13 @@ function mergeMockData(
   // TODO 考虑删除的场景,目前是直接丢弃了,是否需要保留删除的记录
   return result;
 }
+function enableBy(api: IApi) {
+  // 只有 dev 才默认开启
+  if (api.name !== "dev") {
+    return false;
+  }
+  return process.env.MOCK_MANAGER === "enable";
+}
 export interface Context {
   mockData: MockRecords;
   lastUpdateDate?: string;
@@ -79,6 +86,7 @@ export default (api: IApi) => {
           include: joi.array().items(joi.string()),
           // 缓存的mock数据
           cacheOutput: joi.string().default(mockCacheDir),
+          routeBasename: joi.string(),
           // debug 配置控制
           log: joi.object({
             // 是否开启mock匹配的日志输出
@@ -87,20 +95,17 @@ export default (api: IApi) => {
           /**
            * 统一给 url 增加前缀, 考虑到请求库可以统一设置 baseURL,这里增加一个参数统一做处理
            */
-          prefix: joi.string().default("")
+          prefix: joi.string().default(""),
+          autoDisableUmiMock: joi.boolean().default(true)
         });
       }
     },
-    enableBy() {
-      // 只有 dev 才默认开启
-      if (api.name === "dev") {
-        return false;
-      }
-      return process.env.MOCK !== "none";
-    }
+    enableBy: () => enableBy(api)
   });
-  // TODO 禁用默认的mock插件
-  // api.skipPlugins(["mock"]);
+  // 禁用默认的mock插件
+  if (api.userConfig?.autoDisableUmiMock !== false && enableBy(api)) {
+    api.skipPlugins(["mock"]);
+  }
   //  获取 mock 相关的配置
   const mockConfig = api.userConfig.mockManager || {};
   const { data: mockData, updateTime } = readMockCache();
@@ -120,6 +125,7 @@ export default (api: IApi) => {
     }
   };
   mockCacheDir = mockConfig?.cacheOutput || mockCacheDir;
+  const mockRoutePath = `${mockConfig?.routeBasename || ""}/_mock`;
   const updateMockData = () => {
     context.mockData = mergeMockData(
       context.mockData,
@@ -130,10 +136,13 @@ export default (api: IApi) => {
     context.onCacheUpdate?.();
   };
 
-  api.onStart(() => {
+  api.onStart(async () => {
+    const port = await portfinder.getPortPromise({
+      port: Number.parseInt(String(process.env.PORT || 8000))
+    });
     logger.info(
       chalk.greenBright(
-        "mock-manager 插件启动, 请访问 /_mock 页面进行 mock 管理"
+        `mock-manager 插件启动, 请访问 http://localhost:${port}${mockRoutePath} 页面进行 mock 管理`
       )
     );
     const { include = [] } = mockConfig;
@@ -167,7 +176,7 @@ export default (api: IApi) => {
     // TODO 增加 mock 页面的路由,需要手动输入地址跳入，后续看能不能直接加一个菜单
     // 这里只是为了占位，实际的对应组件是在 modifyRoutes 中生成的,原因是这里会对 component 的文件路径进行校验，导致无法通过
     memo.routes.unshift({
-      path: "/_mock",
+      path: mockRoutePath,
       name: "_mock",
       layout: false
     });
